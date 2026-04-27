@@ -17,6 +17,7 @@ const Header: React.FC = () => {
           <a href="/projects" className="hover:text-primary-100 transition-colors">项目列表</a>
           <a href="/learning" className="hover:text-primary-100 transition-colors">学习引导</a>
           <a href="/cognition" className="hover:text-primary-100 transition-colors">认知模块</a>
+          <a href="/profile" className="hover:text-primary-100 transition-colors">个人中心</a>
           <a href="/about" className="hover:text-primary-100 transition-colors">关于平台</a>
         </nav>
         <button 
@@ -70,6 +71,13 @@ const Header: React.FC = () => {
               onClick={() => setMobileMenuOpen(false)}
             >
               认知模块
+            </a>
+            <a 
+              href="/profile" 
+              className="block py-2 hover:bg-primary-800 px-2 rounded transition-colors"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              个人中心
             </a>
             <a 
               href="/about" 

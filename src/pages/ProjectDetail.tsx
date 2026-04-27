@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import { runPythonCode, getPyodideStatus } from '../utils/pyodide';
+import { runPythonCode, getPyodideStatus, setPyodideProgressCallback } from '../utils/pyodide';
 import { getProjectById } from '../data/projects';
 import { Project, ProjectProgress } from '../types/projects';
 import AITools from '../components/AITools';
 import { saveChatMessages, getChatMessages, ChatMessage } from '../utils/storage';
 
-interface ProjectDetailProps {
-  projectId: string;
-}
-
-const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId }) => {
+const ProjectDetail: React.FC = () => {
+  const { id: projectId } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | undefined>(undefined);
   const [code, setCode] = useState<string>('');
   const [output, setOutput] = useState<string>('');
@@ -26,6 +24,8 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId }) => {
 
   // 初始化项目数据
   useEffect(() => {
+    if (!projectId) return;
+    
     const loadedProject = getProjectById(projectId);
     setProject(loadedProject);
     
@@ -46,8 +46,35 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId }) => {
     }
   }, [projectId]);
 
+  // 监听Pyodide加载进度
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const status = getPyodideStatus();
+      setPyodideStatus(status);
+      
+      // 显示加载进度
+      if (status.loading && !status.initialized) {
+        const progressMessages = [
+          '正在加载Python环境...',
+          '正在加载numpy库...',
+          '正在加载pandas库...',
+          'Python环境加载中...',
+          'Python环境即将就绪...'
+        ];
+        const messageIndex = Math.min(Math.floor(status.progress / 25), progressMessages.length - 1);
+        setLoadingStatus(progressMessages[messageIndex] + ` (${status.progress}%)`);
+      } else if (status.initialized && !isRunning) {
+        setLoadingStatus('');
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [isRunning]);
+
   // 加载项目进度
   const loadProjectProgress = () => {
+    if (!projectId) return;
+    
     const progressStr = localStorage.getItem(`project_${projectId}_progress`);
     if (progressStr) {
       try {
@@ -63,6 +90,8 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId }) => {
 
   // 保存项目进度
   const saveProjectProgress = () => {
+    if (!projectId) return;
+    
     const progress: ProjectProgress = {
       code,
       completed: projectCompleted,
@@ -81,7 +110,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId }) => {
 
   // 当聊天记录变化时保存到LocalStorage
   useEffect(() => {
-    if (project) {
+    if (project && projectId) {
       saveChatMessages(projectId, aiMessages);
     }
   }, [aiMessages, projectId, project]);
@@ -416,7 +445,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId }) => {
               onChange={(value) => setCode(value || '')}
               onMount={handleEditorDidMount}
               options={{
-                minimap: { enabled: true },
+                minimap: { enabled: false }, // 禁用迷你图提高性能
                 lineNumbers: 'on',
                 scrollBeyondLastLine: false,
                 theme: 'vs-dark',
@@ -429,20 +458,21 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ projectId }) => {
                   verticalScrollbarSize: 12,
                   horizontalScrollbarSize: 12
                 },
-                suggestOnTriggerCharacters: true,
-                quickSuggestions: {
-                  other: true,
-                  comments: false,
-                  strings: false
-                },
+                suggestOnTriggerCharacters: false, // 禁用自动提示提高性能
+                quickSuggestions: false, // 禁用快速提示
                 parameterHints: {
-                  enabled: true
+                  enabled: false
                 },
                 bracketPairColorization: {
                   enabled: true
                 },
                 wordWrap: 'on',
-                folding: true
+                folding: false, // 禁用代码折叠提高性能
+                renderWhitespace: 'none',
+                renderIndentGuides: false,
+                smoothScrolling: false,
+                cursorSmoothCaretAnimation: 'off',
+                renderLineHighlight: 'none'
               }}
             />
           </div>

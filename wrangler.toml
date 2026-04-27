@@ -14,8 +14,4 @@ CLOUDFLARE_ACCOUNT_ID = ""
 AI_GATEWAY_NAME = ""
 AI_API_KEY = ""
 
-# KV命名空间绑定
-[[kv_namespaces]]
-binding = "KV_STORE"
-id = ""
-preview_id = ""
+

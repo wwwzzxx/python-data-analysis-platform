@@ -47,7 +47,7 @@ const Projects: React.FC = () => {
                   {project.tasks.length} 个任务
                 </div>
               </div>
-              <a href={`/projects/${project.id}`} className="text-primary-600 hover:text-primary-700 font-medium flex items-center">
+              <a href={`/project/${project.id}`} className="text-primary-600 hover:text-primary-700 font-medium flex items-center">
                 开始学习
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
