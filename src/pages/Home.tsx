@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Home: React.FC = () => {
   return (
@@ -12,12 +13,12 @@ const Home: React.FC = () => {
             零成本、零运维、无传统后端，打开浏览器即可使用。
           </p>
           <div className="flex flex-wrap gap-4">
-            <a href="/projects" className="bg-white text-primary-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+            <Link to="/projects" className="bg-white text-primary-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors">
               开始学习
-            </a>
-            <a href="/learning" className="bg-transparent border border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-white/10 transition-colors">
+            </Link>
+            <Link to="/learning" className="bg-transparent border border-white text-white px-6 py-3 rounded-lg font-medium hover:bg-white/10 transition-colors">
               学习引导
-            </a>
+            </Link>
           </div>
         </div>
       </section>
@@ -136,12 +137,12 @@ const Home: React.FC = () => {
                 <p className="text-gray-600 mb-4">
                   学习使用pandas进行数据清洗、处理和基本分析，掌握数据分析的核心技能。
                 </p>
-                <a href={`/projects/${i}`} className="text-primary-600 hover:text-primary-700 font-medium flex items-center">
+                <Link to={`/project/${i}`} className="text-primary-600 hover:text-primary-700 font-medium flex items-center">
                   查看详情
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
-                </a>
+                </Link>
               </div>
             </div>
           ))}

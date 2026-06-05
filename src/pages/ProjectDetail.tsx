@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
-import { runPythonCode, getPyodideStatus, setPyodideProgressCallback } from '../utils/pyodide';
+import { runPythonCode, getPyodideStatus } from '../utils/pyodide';
 import { getProjectById } from '../data/projects';
 import { Project, ProjectProgress } from '../types/projects';
 import AITools from '../components/AITools';
@@ -25,7 +25,6 @@ const ProjectDetail: React.FC = () => {
   // 初始化项目数据
   useEffect(() => {
     if (!projectId) return;
-    
     const loadedProject = getProjectById(projectId);
     setProject(loadedProject);
     
@@ -46,35 +45,9 @@ const ProjectDetail: React.FC = () => {
     }
   }, [projectId]);
 
-  // 监听Pyodide加载进度
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const status = getPyodideStatus();
-      setPyodideStatus(status);
-      
-      // 显示加载进度
-      if (status.loading && !status.initialized) {
-        const progressMessages = [
-          '正在加载Python环境...',
-          '正在加载numpy库...',
-          '正在加载pandas库...',
-          'Python环境加载中...',
-          'Python环境即将就绪...'
-        ];
-        const messageIndex = Math.min(Math.floor(status.progress / 25), progressMessages.length - 1);
-        setLoadingStatus(progressMessages[messageIndex] + ` (${status.progress}%)`);
-      } else if (status.initialized && !isRunning) {
-        setLoadingStatus('');
-      }
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, [isRunning]);
-
   // 加载项目进度
   const loadProjectProgress = () => {
     if (!projectId) return;
-    
     const progressStr = localStorage.getItem(`project_${projectId}_progress`);
     if (progressStr) {
       try {
@@ -91,7 +64,6 @@ const ProjectDetail: React.FC = () => {
   // 保存项目进度
   const saveProjectProgress = () => {
     if (!projectId) return;
-    
     const progress: ProjectProgress = {
       code,
       completed: projectCompleted,
@@ -225,7 +197,7 @@ const ProjectDetail: React.FC = () => {
     }
   };
 
-  const handleAiToolClick = async (toolType: 'hint' | 'debug' | 'error', context?: string) => {
+  const handleAiToolClick = async (toolType: 'hint' | 'debug' | 'error') => {
     let userMessage = '';
     
     switch (toolType) {
@@ -280,9 +252,9 @@ const ProjectDetail: React.FC = () => {
           </svg>
           <h3 className="text-lg font-medium text-gray-900">项目不存在</h3>
           <p className="text-gray-500 mt-2">请检查项目ID是否正确</p>
-          <a href="/projects" className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+          <Link to="/projects" className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
             返回项目列表
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -323,12 +295,12 @@ const ProjectDetail: React.FC = () => {
             </div>
           </div>
           <div className="flex-shrink-0">
-            <a href="/projects" className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+            <Link to="/projects" className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
               <svg className="h-4 w-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
               返回项目列表
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -445,7 +417,7 @@ const ProjectDetail: React.FC = () => {
               onChange={(value) => setCode(value || '')}
               onMount={handleEditorDidMount}
               options={{
-                minimap: { enabled: false }, // 禁用迷你图提高性能
+                minimap: { enabled: true },
                 lineNumbers: 'on',
                 scrollBeyondLastLine: false,
                 theme: 'vs-dark',
@@ -458,21 +430,20 @@ const ProjectDetail: React.FC = () => {
                   verticalScrollbarSize: 12,
                   horizontalScrollbarSize: 12
                 },
-                suggestOnTriggerCharacters: false, // 禁用自动提示提高性能
-                quickSuggestions: false, // 禁用快速提示
+                suggestOnTriggerCharacters: true,
+                quickSuggestions: {
+                  other: true,
+                  comments: false,
+                  strings: false
+                },
                 parameterHints: {
-                  enabled: false
+                  enabled: true
                 },
                 bracketPairColorization: {
                   enabled: true
                 },
                 wordWrap: 'on',
-                folding: false, // 禁用代码折叠提高性能
-                renderWhitespace: 'none',
-                renderIndentGuides: false,
-                smoothScrolling: false,
-                cursorSmoothCaretAnimation: 'off',
-                renderLineHighlight: 'none'
+                folding: true
               }}
             />
           </div>

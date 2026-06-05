@@ -47,57 +47,41 @@ export async function initPyodide() {
         lockFileURL: 'https://cdn.jsdelivr.net/pyodide/v0.29.3/full/lockfile.json'
       });
       
-      updateProgress(50);
+      updateProgress(30);
       
-      // 只预加载最基础的包，提高首次加载速度
-      const basicPackages = ['numpy', 'pandas'];
-      for (let i = 0; i < basicPackages.length; i++) {
-        await pyodide.loadPackage(basicPackages[i]);
-        updateProgress(50 + (i + 1) * 15);
+      // 预装核心库，分批加载以提高速度
+      const packages = ['pandas', 'numpy', 'matplotlib', 'seaborn', 'scikit-learn', 'mlxtend'];
+      for (let i = 0; i < packages.length; i++) {
+        await pyodide.loadPackage(packages[i]);
+        updateProgress(30 + (i + 1) * 10);
       }
       
-      updateProgress(80);
+      updateProgress(90);
       
-      // 配置基本Python环境，不依赖matplotlib
+      // 配置matplotlib，使其在前端渲染
       pyodide.runPython(`
-        import sys
-        # 设置基本环境
+        import matplotlib.pyplot as plt
+        import io
+        import base64
+        
+        # 设置中文字体
+        plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei']
+        plt.rcParams['axes.unicode_minus'] = False
+        plt.ioff()
+        
+        # 自定义显示函数，将图表转换为base64
+        def show_plot():
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png')
+            buf.seek(0)
+            img_str = base64.b64encode(buf.read()).decode('utf-8')
+            plt.close()
+            return f'data:image/png;base64,{img_str}'
+        
+        # 暴露给JavaScript
+        import js
+        js.show_plot = show_plot
       `);
-      
-      updateProgress(100);
-      
-      // 异步预加载其他包，不阻塞初始化
-      const extraPackages = ['matplotlib', 'seaborn', 'scikit-learn', 'mlxtend'];
-      Promise.all(extraPackages.map(pkg => 
-        pyodide.loadPackage(pkg).then(() => {
-          if (pkg === 'matplotlib') {
-            // 配置matplotlib
-            pyodide.runPython(`
-              import matplotlib.pyplot as plt
-              import io
-              import base64
-              
-              # 设置中文字体
-              plt.rcParams['font.sans-serif'] = ['WenQuanYi Zen Hei', 'SimHei']
-              plt.rcParams['axes.unicode_minus'] = False
-              plt.ioff()
-              
-              # 自定义显示函数，将图表转换为base64
-              def show_plot():
-                  buf = io.BytesIO()
-                  plt.savefig(buf, format='png')
-                  buf.seek(0)
-                  img_str = base64.b64encode(buf.read()).decode('utf-8')
-                  plt.close()
-                  return f'data:image/png;base64,{img_str}'
-              
-              # 暴露给JavaScript
-              import js
-              js.show_plot = show_plot
-            `);
-          }
-        }).catch(() => {})
-      ));
       
       updateProgress(100);
       

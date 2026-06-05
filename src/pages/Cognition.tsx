@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { saveProjectProgress, getProjectProgress } from '../utils/storage';
+import { saveProjectProgress } from '../utils/storage';
 
 // 思维模型数据
 const thinkingModels = [
