@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Python数据分析AI训练平台</title>
+    <script type="text/javascript">
+      // 处理React Router的404回退
+      // 当用户直接访问子路由时，GitHub Pages返回404
+      // 我们需要重定向到index.html并保留路径
+      var path = window.location.pathname;
+      // 如果路径不是根路径，重定向到index.html
+      if (path !== '/python-data-analysis-platform/' && path !== '/python-data-analysis-platform') {
+        // 使用replaceState保留URL，然后跳转到index.html
+        window.history.replaceState({}, '', '/python-data-analysis-platform');
+        window.location.href = '/python-data-analysis-platform/';
+      }
+    </script>
+  </head>
+  <body>
+  </body>
+</html>
